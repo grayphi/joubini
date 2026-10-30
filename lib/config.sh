@@ -32,3 +32,24 @@ load_config_as_bash(){
 }
 
 
+read_config_as_raw(){
+	local config_name="$1"
+	config_file="$__CONFIG_DIR__/$config_name"
+
+	[ -z "$config_name" ] && raise ArgumentMissingException "Can't read config, name not provided."
+	[ -f "$config_file" ] || raise InvalidValueException "Can't find config file."
+
+   cat "$config_file"
+}
+
+
+get_config_file(){
+	local config_name="$1"
+	config_file="$__CONFIG_DIR__/$config_name"
+
+	[ -z "$config_name" ] && raise ArgumentMissingException "Can't read config, name not provided."
+	[ -f "$config_file" ] || raise InvalidValueException "Can't find config file."
+
+   printf "%s" "$config_file"
+}
+

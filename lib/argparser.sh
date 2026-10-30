@@ -144,15 +144,21 @@ is_arg_set(){
 	local _arg_val="${ref_op_val["$_arg_name"]}"
 
 	local _retval=/usr/bin/false
+   local _retflag=1
 	_arg_val=${_arg_val#/usr/bin/}
 
 	# return true if type is flag and is set, else if non-empty
-	[ "$_arg_type" == "flag" ] && { [ "$_arg_val" == "true" ] && _retval=/usr/bin/true; } || { [ -n "$_arg_val" ] && _retval=/usr/bin/true; }
+	[ "$_arg_type" == "flag" ] && {
+         [ "$_arg_val" == "true" ] && { _retval=/usr/bin/true; _retflag=0; }
+      } || {
+         [ -n "$_arg_val" ] && { _retval=/usr/bin/true; _retflag=0; }
+      }
 
 	unset -n ref_op_type
 	unset -n ref_op_val
 
-	printf "%s" "$_retval"
+	echo $_retval
+   return $_retflag
 }
 
 
@@ -212,9 +218,12 @@ parse_args(){
 }
 
 
-# args_debug <parser_name>
+# args_debug <parser_name> <no_exit>
+# no_exit: 1|true|yes|0|false|no
+# default is no, and can be skipped
 args_print_help(){
 	local _pname="$1"
+   local _no_exit="$2"
 
 	[ -z "$_pname" ] && raise EmptyArgException "Argument value not supplied."
 	[[ "$_pname" =~ ^[a-zA-Z_][a-zA-Z_0-9]*$ ]] || raise InvalidNameException "Arg parser name is invalid."
@@ -239,5 +248,7 @@ args_print_help(){
 	unset -n ref_op_sh
 	unset -n ref_op_ln
 	unset -n ref_op_help
+
+   [[ "${_no_exit@L}" =~ ^(1|true|yes|y)$ ]] || exit 0
 }
 
